@@ -1,0 +1,195 @@
+"use client"
+
+import { useState } from "react"
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
+// Define the employee schema
+const employeeSchema = z.object({
+  id: z.string().min(1, "Employee ID is required"),
+  name: z.string().min(1, "Name is required").max(20, "Name must be 20 characters or less"),
+  age: z.number().min(18, "Age must be above 18"),
+  email: z.string().email("Invalid email format"),
+  phone: z.string().min(1, "Phone number is required"),
+  qualification: z.string().min(1, "Qualification is required"),
+  experience: z.number().min(0, "Experience is required"),
+})
+
+type Employee = z.infer<typeof employeeSchema>
+
+// Pre-populated Indian employees data
+const initialEmployees: Employee[] = [
+  {
+    id: "IND001",
+    name: "Rahul Sharma",
+    age: 28,
+    email: "rahul.sharma@example.com",
+    phone: "+91 9876543210",
+    qualification: "B.Tech",
+    experience: 5,
+  },
+  {
+    id: "IND002",
+    name: "Priya Patel",
+    age: 32,
+    email: "priya.patel@example.com",
+    phone: "+91 8765432109",
+    qualification: "MBA",
+    experience: 8,
+  },
+  {
+    id: "IND003",
+    name: "Amit Kumar",
+    age: 25,
+    email: "amit.kumar@example.com",
+    phone: "+91 7654321098",
+    qualification: "MCA",
+    experience: 3,
+  },
+  {
+    id: "IND004",
+    name: "Sneha Reddy",
+    age: 30,
+    email: "sneha.reddy@example.com",
+    phone: "+91 6543210987",
+    qualification: "M.Sc",
+    experience: 6,
+  },
+  {
+    id: "IND005",
+    name: "Vikram Singh",
+    age: 35,
+    email: "vikram.singh@example.com",
+    phone: "+91 5432109876",
+    qualification: "Ph.D",
+    experience: 10,
+  },
+  {
+    id: "IND006",
+    name: "Ananya Gupta",
+    age: 27,
+    email: "ananya.gupta@example.com",
+    phone: "+91 4321098765",
+    qualification: "B.E",
+    experience: 4,
+  },
+]
+
+export default function EmployeeManagementSystem() {
+  const [employees, setEmployees] = useState<Employee[]>(initialEmployees)
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<Employee>({
+    resolver: zodResolver(employeeSchema),
+  })
+
+  const onSubmit = (data: Employee) => {
+    if (employees.some(e => e.id === data.id)) {
+      alert("Employee ID must be unique");
+      return;
+    }
+    setEmployees([...employees, data])
+    reset()
+  }
+
+  return (
+    <div className="container mx-auto p-4">
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Add Employee</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <Label htmlFor="id">Employee ID</Label>
+              <Input id="id" {...register("id")} />
+              {errors.id && <p className="text-red-500 text-sm">{errors.id.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="name">Employee Name</Label>
+              <Input id="name" {...register("name")} />
+              {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="age">Age</Label>
+              <Input id="age" type="number" {...register("age", { valueAsNumber: true })} />
+              {errors.age && <p className="text-red-500 text-sm">{errors.age.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="email">Email ID</Label>
+              <Input id="email" type="email" {...register("email")} />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input id="phone" {...register("phone")} />
+              {errors.phone && <p className="text-red-500 text-sm">{errors.phone.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="qualification">Qualification</Label>
+              <Input id="qualification" {...register("qualification")} />
+              {errors.qualification && <p className="text-red-500 text-sm">{errors.qualification.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="experience">Experience (years)</Label>
+              <Input id="experience" type="number" {...register("experience", { valueAsNumber: true })} />
+              {errors.experience && <p className="text-red-500 text-sm">{errors.experience.message}</p>}
+            </div>
+            <Button type="submit">Add Employee</Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Employee List</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Age</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Qualification</TableHead>
+                <TableHead>Experience</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {employees.map((employee) => (
+                <TableRow key={employee.id}>
+                  <TableCell>{employee.id}</TableCell>
+                  <TableCell>{employee.name}</TableCell>
+                  <TableCell>{employee.age}</TableCell>
+                  <TableCell>{employee.email}</TableCell>
+                  <TableCell>{employee.phone}</TableCell>
+                  <TableCell>{employee.qualification}</TableCell>
+                  <TableCell>{employee.experience}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
